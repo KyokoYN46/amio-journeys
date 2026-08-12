@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AMIO Afterglow</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AMIO Afterglow">
+<style>tw-story {
+	background-color: #1a1a2e;
+	color: #e0e0e0;
+	font-family: &#x27;Segoe UI&#x27;, Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 1.2em;
+	line-height: 1.6;
+}
+
+tw-link {
+	color: #a2d2ff;
+	text-decoration: none;
+	border-bottom: 1px dashed #a2d2ff;
+}
+
+tw-link:hover {
+	color: #ffafcc;
+	border-bottom: 1px solid #ffafcc;
+}
+
+.dev-note {
+	background-color: #2e2e4e;
+	border-left: 4px solid #a2d2ff;
+	padding: 10px;
+	margin: 20px 0;
+	font-size: 0.9em;
+	font-style: italic;
+	color: #b0b0cf;
+}</style>
+<script>document.addEventListener('DOMContentLoaded', () => {
+    const storyData = document.querySelector('tw-storydata');
+    if (!storyData) return;
+
+    const startNodeId = storyData.getAttribute('startnode');
+    const passages = Array.from(storyData.querySelectorAll('tw-passagedata'));
+    const passageMap = new Map(passages.map(p => [p.getAttribute('name'), p]));
+    const pidMap = new Map(passages.map(p => [p.getAttribute('pid'), p]));
+
+    // Create the Harlowe-like structure
+    const twStory = document.createElement('tw-story');
+    document.body.appendChild(twStory);
+
+    function showPassage(nameOrPid) {
+        let passage = passageMap.get(nameOrPid) || pidMap.get(nameOrPid);
+        if (!passage) return;
+
+        twStory.innerHTML = '';
+        const twPassage = document.createElement('tw-passage');
+        
+        let content = passage.textContent;
+        
+        // Handle Links [[Text->Target]] or [[Target]]
+        content = content.replace(/\[\[(.*?)(?:->|\|)(.*?)\]\]/g, (match, text, target) => {
+            return `<tw-link data-target="${target.trim()}">${text.trim()}</tw-link>`;
+        });
+        content = content.replace(/\[\[(.*?)\]\]/g, (match, target) => {
+            if (target.includes('tw-link')) return match;
+            return `<tw-link data-target="${target.trim()}">${target.trim()}</tw-link>`;
+        });
+
+        twPassage.innerHTML = content;
+        twStory.appendChild(twPassage);
+
+        // Add event listeners to links
+        twPassage.querySelectorAll('tw-link').forEach(link => {
+            link.addEventListener('click', () => {
+                showPassage(link.getAttribute('data-target'));
+                window.scrollTo(0, 0);
+            });
+        });
+    }
+
+    // Basic styling for the custom tags if not provided in stylesheet
+    const baseStyle = document.createElement('style');
+    baseStyle.textContent = `
+        body { margin: 0; padding: 0; background-color: inherit; color: inherit; }
+        tw-story { display: block; padding: 5%; min-height: 100vh; box-sizing: border-box; }
+        tw-passage { display: block; animation: fadeIn 0.4s ease; white-space: pre-wrap; }
+        tw-link { cursor: pointer; display: inline-block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    `;
+    document.head.appendChild(baseStyle);
+
+    showPassage(startNodeId);
+});
+</script>
+</head>
+<body>
+<tw-storydata name="AMIO Afterglow" startnode="1" creator="Manus" creator-version="1.0.0" ifid="9737fc6f-350a-44f2-a2a5-fd44f937dfae" format="Harlowe" format-version="3.3.9" options="" hidden>
+<style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">tw-story {
+	background-color: #1a1a2e;
+	color: #e0e0e0;
+	font-family: &#x27;Segoe UI&#x27;, Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 1.2em;
+	line-height: 1.6;
+}
+
+tw-link {
+	color: #a2d2ff;
+	text-decoration: none;
+	border-bottom: 1px dashed #a2d2ff;
+}
+
+tw-link:hover {
+	color: #ffafcc;
+	border-bottom: 1px solid #ffafcc;
+}
+
+.dev-note {
+	background-color: #2e2e4e;
+	border-left: 4px solid #a2d2ff;
+	padding: 10px;
+	margin: 20px 0;
+	font-size: 0.9em;
+	font-style: italic;
+	color: #b0b0cf;
+}</style>
+<script role="script" id="twine-user-script" type="text/twine-javascript"></script>
+<tw-passagedata pid="1" name="Start" tags="" x="100" y="100">🌙 Welcome back.
+
+How are you arriving tonight?
+
+[[My mind won&#x27;t stop racing.-&gt;Racing Mind]]
+[[I feel lonely.-&gt;Feeling Lonely]]
+[[I had a stressful day.-&gt;Stressful Day]]
+[[I can&#x27;t sleep.-&gt;Cant Sleep]]
+[[I&#x27;m okay—I just want to unwind.-&gt;Just Unwind]]
+
+---
+[[📱 How to save this to your phone-&gt;Mobile Setup]]</tw-passagedata>
+<tw-passagedata pid="2" name="Racing Mind" tags="" x="300" y="100">I understand.
+Let&#x27;s slow things down together.
+
+Choose one.
+
+[[I keep replaying conversations.-&gt;Replaying Conversations]]
+[[I&#x27;m worried about tomorrow.-&gt;Worried About Tomorrow]]
+[[Work feels overwhelming.-&gt;Work Overwhelming]]
+[[Something personal happened.-&gt;Something Personal]]</tw-passagedata>
+<tw-passagedata pid="3" name="Worried About Tomorrow" tags="" x="500" y="100">Sometimes our minds try to solve tomorrow before today has even finished.
+
+The Owl settles nearby, unhurried.
+
+&quot;Tomorrow will still be there,&quot; she says. &quot;Right now, there&#x27;s just this.&quot;
+
+Would you like to...
+
+[[Breathe with me for two minutes.-&gt;Breathing Exercise]]
+[[Read a short story.-&gt;Short Story]]
+[[Listen to calming music.-&gt;Calming Music]]
+[[Write one thought down and let it go.-&gt;Write Thought]]</tw-passagedata>
+<tw-passagedata pid="4" name="Replaying Conversations" tags="" x="700" y="100">The words are still turning over in your mind, again and again.
+
+The Owl tilts her head.
+
+&quot;You can&#x27;t rewrite what already happened. But you can put it down, just for tonight.&quot;
+
+Would you like to...
+
+[[Breathe with me for two minutes.-&gt;Breathing Exercise]]
+[[Read a short story.-&gt;Short Story]]
+[[Listen to calming music.-&gt;Calming Music]]
+[[Write one thought down and let it go.-&gt;Write Thought]]</tw-passagedata>
+<tw-passagedata pid="5" name="Work Overwhelming" tags="" x="900" y="100">There&#x27;s a lot sitting on your shoulders right now.
+
+The Bear settles in beside you, solid and unhurried.
+
+&quot;None of it needs solving tonight. It&#x27;ll still be there in the morning — and so will you.&quot;
+
+Would you like to...
+
+[[Breathe with me for two minutes.-&gt;Breathing Exercise]]
+[[Read a short story.-&gt;Short Story]]
+[[Listen to calming music.-&gt;Calming Music]]
+[[Write one thought down and let it go.-&gt;Write Thought]]</tw-passagedata>
+<tw-passagedata pid="6" name="Something Personal" tags="" x="100" y="300">That sounds like it&#x27;s sitting heavy.
+
+You don&#x27;t have to explain it. Not to me, not tonight.
+
+&quot;I&#x27;m just here,&quot; the Owl says quietly. &quot;That&#x27;s all.&quot;
+
+Would you like to...
+
+[[Breathe with me for two minutes.-&gt;Breathing Exercise]]
+[[Read a short story.-&gt;Short Story]]
+[[Listen to calming music.-&gt;Calming Music]]
+[[Write one thought down and let it go.-&gt;Write Thought]]</tw-passagedata>
+<tw-passagedata pid="7" name="Feeling Lonely" tags="" x="300" y="300">Tonight feels quiet.
+Maybe too quiet.
+
+What kind of company would help tonight?
+
+[[A cosy cat-&gt;Cosy Cat]]
+[[A walk through a forest-&gt;Forest Walk]]
+[[Sitting by the ocean-&gt;Ocean Sitting]]
+[[A quiet café-&gt;Quiet Cafe]]
+[[Someone who understands-&gt;Someone Who Understands]]</tw-passagedata>
+<tw-passagedata pid="8" name="Someone Who Understands" tags="" x="500" y="300">You enter a little café.
+Only one person is there.
+They smile.
+
+&quot;I&#x27;ve had days like yours too.&quot;
+
+Would you like to...
+
+[[Listen-&gt;Cafe Listen]]
+[[Talk-&gt;Cafe Talk]]
+[[Sit quietly-&gt;Cafe Quiet]]
+[[Have tea together-&gt;Cafe Tea]]</tw-passagedata>
+<tw-passagedata pid="9" name="Cafe Listen" tags="" x="700" y="300">They talk, unhurried, about small things — a walk they took, a song they liked as a kid.
+
+Nothing that needs a response from you. Just company.
+
+Slowly, the quiet in the room starts to feel less empty, and more shared.
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="10" name="Cafe Talk" tags="" x="900" y="300">You find yourself saying more than you expected to.
+
+They don&#x27;t try to fix anything. They just nod, and let you finish.
+
+&quot;Thank you for telling me,&quot; they say. &quot;That took something.&quot;
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="11" name="Cafe Quiet" tags="" x="100" y="500">Neither of you says much.
+
+Somehow, that&#x27;s enough. Two people, one small table, no pressure to fill the silence.
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="12" name="Cafe Tea" tags="" x="300" y="500">The tea is warm in your hands. Outside, the evening carries on without needing anything from you.
+
+For a few minutes, there&#x27;s nowhere else you need to be.
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="13" name="Cosy Cat" tags="" x="500" y="500">A small cat appears, curling up beside you without asking permission — the way cats do.
+
+It doesn&#x27;t need anything from you. It&#x27;s just here, warm and steady, purring low.
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="14" name="Forest Walk" tags="" x="700" y="500">The Forest opens quietly around you — soft ground, the sound of leaves, nothing urgent.
+
+You don&#x27;t need a destination tonight. Just the walking.
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="15" name="Ocean Sitting" tags="" x="900" y="500">The Ocean moves the way it always has, in and out, asking nothing of you.
+
+You sit at its edge and let it be louder than your thoughts for a while.
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="16" name="Quiet Cafe" tags="" x="100" y="700">Cups clink softly somewhere behind you. No one here needs anything from you tonight.
+
+You find a seat by the window and let the evening pass slowly.
+
+[[Stay a little longer-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="17" name="Stressful Day" tags="" x="300" y="700">That sounds like a lot to carry.
+
+The Bear sits close, steady, taking up space beside you.
+
+&quot;You made it through the day. That&#x27;s not nothing.&quot;
+
+Would you like to...
+
+[[Breathe with me for two minutes.-&gt;Breathing Exercise]]
+[[Read a short story.-&gt;Short Story]]
+[[Listen to calming music.-&gt;Calming Music]]
+[[Write one thought down and let it go.-&gt;Write Thought]]</tw-passagedata>
+<tw-passagedata pid="18" name="Cant Sleep" tags="" x="500" y="700">Some nights the body&#x27;s tired, but the mind hasn&#x27;t caught up yet.
+
+The Owl waits with you. She&#x27;s in no rush either.
+
+Would you like to...
+
+[[Breathe with me for two minutes.-&gt;Breathing Exercise]]
+[[Read a short story.-&gt;Short Story]]
+[[Listen to calming music.-&gt;Calming Music]]
+[[Write one thought down and let it go.-&gt;Write Thought]]</tw-passagedata>
+<tw-passagedata pid="19" name="Just Unwind" tags="" x="700" y="700">No heaviness tonight — just some time to yourself.
+
+The Cat stretches out beside you, content to just exist for a while.
+
+Would you like to...
+
+[[Breathe with me for two minutes.-&gt;Breathing Exercise]]
+[[Read a short story.-&gt;Short Story]]
+[[Listen to calming music.-&gt;Calming Music]]
+[[Sit quietly, just because.-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="20" name="Breathing Exercise" tags="" x="900" y="700">&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: this passage should trigger a 2-minute guided breathing animation/audio in the production build. In Twine, this can only be simulated with text.&lt;/div&gt;
+
+Breathe in slowly. Four counts.
+
+Hold, gently. Four counts.
+
+Breathe out, slower than you breathed in. Six counts.
+
+We&#x27;ll do this together, a few more times, no need to count out loud.
+
+[[I&#x27;m ready to continue-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="21" name="Short Story" tags="" x="100" y="900">**The Lantern**
+
+There was once a small light that thought its only job was to burn as brightly as possible, all night, every night.
+
+One evening, it flickered — not out, just low. And it worried this meant it had failed.
+
+But the people walking past didn&#x27;t need the brightest light. They just needed one they could see from a distance, however steady.
+
+The lantern kept flickering, softly, all night. And it was enough.
+
+[[I&#x27;m ready to continue-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="22" name="Calming Music" tags="" x="300" y="900">&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: this passage should trigger an embedded audio track in the production build.&lt;/div&gt;
+
+A slow, low melody begins — the kind with space between the notes.
+
+Nothing to follow, nothing to figure out. Just something to listen to.
+
+[[I&#x27;m ready to continue-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="23" name="Write Thought" tags="" x="500" y="900">&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: this passage should include a text input field in the production build, allowing the user to type a thought that visually &quot;fades&quot; or &quot;releases&quot; on screen.&lt;/div&gt;
+
+What&#x27;s the one thought that keeps circling?
+
+Write it down, even just in your head. You don&#x27;t have to solve it. Just name it, and let it sit somewhere outside of you for tonight.
+
+(input-box: bind _thought, &quot;X&quot;)
+
+[[I&#x27;ve let it go-&gt;Ending Hub]]</tw-passagedata>
+<tw-passagedata pid="24" name="Ending Hub" tags="" x="700" y="900">What helped you tonight?
+
+[[🌙 The breathing-&gt;Note Prompt]]
+[[📖 The story-&gt;Note Prompt]]
+[[💛 The reminder that I&#x27;m not alone-&gt;Note Prompt]]</tw-passagedata>
+<tw-passagedata pid="25" name="Note Prompt" tags="" x="900" y="900">Would you like to anonymously leave one sentence for someone else?
+
+Someone tomorrow may read it.
+
+&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: &quot;Leave a note&quot; requires a backend text-submission + moderation queue in production. Cannot be built natively in Twine — this passage is a placeholder for that flow.&lt;/div&gt;
+
+[[Leave a note-&gt;Leave Note]]
+[[Not tonight-&gt;Receive Note]]</tw-passagedata>
+<tw-passagedata pid="26" name="Leave Note" tags="" x="100" y="1100">&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: insert text input here in production build. In this prototype, treat this as a placeholder screen.&lt;/div&gt;
+
+Thank you. Your words may be exactly what someone else needs tomorrow night.
+
+[[Continue-&gt;Receive Note]]</tw-passagedata>
+<tw-passagedata pid="27" name="Receive Note" tags="" x="300" y="1100">A note from another AMIO companion:
+
+&quot;You&#x27;ve survived every hard day so far.&quot;
+
+[[Goodnight-&gt;Goodnight]]</tw-passagedata>
+<tw-passagedata pid="28" name="Goodnight" tags="" x="500" y="1100">🌙 Goodnight.
+
+I&#x27;ll be here tomorrow, whenever you&#x27;re ready.</tw-passagedata>
+<tw-passagedata pid="29" name="Mobile Setup" tags="" x="700" y="1100">### How to save AMIO Afterglow to your phone
+
+To access this experience easily every day:
+
+**On iPhone (Safari):**
+1. Tap the **Share** button (the square with an arrow pointing up).
+2. Scroll down and tap **Add to Home Screen**.
+3. Tap **Add** in the top right corner.
+
+**On Android (Chrome):**
+1. Tap the **three dots** in the top right corner.
+2. Tap **Install App** or **Add to Home Screen**.
+
+Once added, AMIO Afterglow will appear as an icon on your home screen and open in full-screen mode, just like a native app.
+
+[[Back to the start-&gt;Start]]</tw-passagedata>
+</tw-storydata>
+</body>
+</html>
