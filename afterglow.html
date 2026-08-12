@@ -9,32 +9,31 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="AMIO Afterglow">
 <style>tw-story {
-	background-color: #1a1a2e;
-	color: #e0e0e0;
-	font-family: &#x27;Segoe UI&#x27;, Tahoma, Geneva, Verdana, sans-serif;
+	background-color: #2d2f22;
+	color: #faf8f3;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	font-size: 1.2em;
 	line-height: 1.6;
 }
 
 tw-link {
-	color: #a2d2ff;
-	text-decoration: none;
-	border-bottom: 1px dashed #a2d2ff;
+	color: #faf8f3;
+	text-decoration: underline;
+	font-weight: bold;
 }
 
 tw-link:hover {
-	color: #ffafcc;
-	border-bottom: 1px solid #ffafcc;
+	opacity: 0.8;
 }
 
 .dev-note {
-	background-color: #2e2e4e;
-	border-left: 4px solid #a2d2ff;
+	background-color: rgba(250, 248, 243, 0.1);
+	border-left: 4px solid #faf8f3;
 	padding: 10px;
 	margin: 20px 0;
 	font-size: 0.9em;
 	font-style: italic;
-	color: #b0b0cf;
+	color: #faf8f3;
 }</style>
 <script>document.addEventListener('DOMContentLoaded', () => {
     const storyData = document.querySelector('tw-storydata');
@@ -45,9 +44,40 @@ tw-link:hover {
     const passageMap = new Map(passages.map(p => [p.getAttribute('name'), p]));
     const pidMap = new Map(passages.map(p => [p.getAttribute('pid'), p]));
 
-    // Create the Harlowe-like structure
     const twStory = document.createElement('tw-story');
     document.body.appendChild(twStory);
+
+    const baseStyle = document.createElement('style');
+    baseStyle.textContent = `
+        body { margin: 0; padding: 0; background-color: inherit; color: inherit; overflow-x: hidden; }
+        tw-story { display: block; padding: 10% 5%; min-height: 100vh; box-sizing: border-box; max-width: 600px; margin: 0 auto; }
+        tw-passage { display: block; animation: fadeIn 0.6s ease; white-space: pre-wrap; }
+        tw-link { cursor: pointer; display: block; margin-top: 20px; text-decoration: underline; font-weight: bold; }
+        tw-link:hover { opacity: 0.7; }
+        
+        .interactive-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2); }
+        input[type="text"], textarea { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid currentColor; color: inherit; padding: 12px; border-radius: 8px; font-size: 1em; margin-bottom: 10px; box-sizing: border-box; }
+        
+        .breathing-circle { width: 150px; height: 150px; border-radius: 50%; border: 2px solid currentColor; margin: 40px auto; display: flex; align-items: center; justify-content: center; position: relative; }
+        .breathing-circle::after { content: ''; width: 100%; height: 100%; border-radius: 50%; background: currentColor; opacity: 0.2; position: absolute; animation: breathe 14s infinite ease-in-out; }
+        .breathing-text { position: relative; z-index: 1; font-weight: bold; }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.6); } /* In 4s */
+            28% { transform: scale(1); } /* Hold 4s */
+            57% { transform: scale(1); } /* Out 6s */
+            100% { transform: scale(0.6); }
+        }
+
+        .fade-out { animation: fadeOutText 2s forwards; }
+        @keyframes fadeOutText { to { opacity: 0; transform: translateY(-20px); } }
+
+        .audio-player { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 30px; }
+        .play-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    `;
+    document.head.appendChild(baseStyle);
 
     function showPassage(nameOrPid) {
         let passage = passageMap.get(nameOrPid) || pidMap.get(nameOrPid);
@@ -55,10 +85,32 @@ tw-link:hover {
 
         twStory.innerHTML = '';
         const twPassage = document.createElement('tw-passage');
-        
         let content = passage.textContent;
+
+        // Process Interactive Components
+        content = content.replace(/\[input:(.*?)\]/g, '<div class="interactive-box"><input type="text" placeholder="$1"></div>');
         
-        // Handle Links [[Text->Target]] or [[Target]]
+        content = content.replace(/\[breathing\]/g, `
+            <div class="breathing-circle">
+                <div class="breathing-text" id="breathe-label">Breathe</div>
+            </div>
+        `);
+
+        content = content.replace(/\[audio:(.*?)\]/g, `
+            <div class="audio-player">
+                <div class="play-btn">▶</div>
+                <span>Playing $1...</span>
+            </div>
+        `);
+
+        content = content.replace(/\[fade-input:(.*?)\]/g, `
+            <div class="interactive-box" id="fade-box">
+                <textarea id="fade-text" placeholder="$1"></textarea>
+                <tw-link id="release-btn">Release this thought</tw-link>
+            </div>
+        `);
+
+        // Handle Links
         content = content.replace(/\[\[(.*?)(?:->|\|)(.*?)\]\]/g, (match, text, target) => {
             return `<tw-link data-target="${target.trim()}">${text.trim()}</tw-link>`;
         });
@@ -70,25 +122,47 @@ tw-link:hover {
         twPassage.innerHTML = content;
         twStory.appendChild(twPassage);
 
+        // Logic for Breathing
+        const label = document.getElementById('breathe-label');
+        if (label) {
+            let phase = 0;
+            const phases = [
+                { text: "Breathe In", duration: 4000 },
+                { text: "Hold", duration: 4000 },
+                { text: "Breathe Out", duration: 6000 }
+            ];
+            const updateBreathe = () => {
+                label.textContent = phases[phase].text;
+                setTimeout(() => {
+                    phase = (phase + 1) % 3;
+                    updateBreathe();
+                }, phases[phase].duration);
+            };
+            updateBreathe();
+        }
+
+        // Logic for Fade Input
+        const releaseBtn = document.getElementById('release-btn');
+        const fadeText = document.getElementById('fade-text');
+        if (releaseBtn && fadeText) {
+            releaseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                fadeText.classList.add('fade-out');
+                setTimeout(() => {
+                    showPassage(releaseBtn.getAttribute('data-target'));
+                }, 2000);
+            });
+        }
+
         // Add event listeners to links
         twPassage.querySelectorAll('tw-link').forEach(link => {
+            if (link.id === 'release-btn') return;
             link.addEventListener('click', () => {
                 showPassage(link.getAttribute('data-target'));
                 window.scrollTo(0, 0);
             });
         });
     }
-
-    // Basic styling for the custom tags if not provided in stylesheet
-    const baseStyle = document.createElement('style');
-    baseStyle.textContent = `
-        body { margin: 0; padding: 0; background-color: inherit; color: inherit; }
-        tw-story { display: block; padding: 5%; min-height: 100vh; box-sizing: border-box; }
-        tw-passage { display: block; animation: fadeIn 0.4s ease; white-space: pre-wrap; }
-        tw-link { cursor: pointer; display: inline-block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    `;
-    document.head.appendChild(baseStyle);
 
     showPassage(startNodeId);
 });
@@ -97,32 +171,31 @@ tw-link:hover {
 <body>
 <tw-storydata name="AMIO Afterglow" startnode="1" creator="Manus" creator-version="1.0.0" ifid="9737fc6f-350a-44f2-a2a5-fd44f937dfae" format="Harlowe" format-version="3.3.9" options="" hidden>
 <style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">tw-story {
-	background-color: #1a1a2e;
-	color: #e0e0e0;
+	background-color: #2d2f22;
+	color: #faf8f3;
 	font-family: &#x27;Segoe UI&#x27;, Tahoma, Geneva, Verdana, sans-serif;
 	font-size: 1.2em;
 	line-height: 1.6;
 }
 
 tw-link {
-	color: #a2d2ff;
-	text-decoration: none;
-	border-bottom: 1px dashed #a2d2ff;
+	color: #faf8f3;
+	text-decoration: underline;
+	font-weight: bold;
 }
 
 tw-link:hover {
-	color: #ffafcc;
-	border-bottom: 1px solid #ffafcc;
+	opacity: 0.8;
 }
 
 .dev-note {
-	background-color: #2e2e4e;
-	border-left: 4px solid #a2d2ff;
+	background-color: rgba(250, 248, 243, 0.1);
+	border-left: 4px solid #faf8f3;
 	padding: 10px;
 	margin: 20px 0;
 	font-size: 0.9em;
 	font-style: italic;
-	color: #b0b0cf;
+	color: #faf8f3;
 }</style>
 <script role="script" id="twine-user-script" type="text/twine-javascript"></script>
 <tw-passagedata pid="1" name="Start" tags="" x="100" y="100">🌙 Welcome back.
@@ -292,13 +365,7 @@ Would you like to...
 [[Read a short story.-&gt;Short Story]]
 [[Listen to calming music.-&gt;Calming Music]]
 [[Sit quietly, just because.-&gt;Ending Hub]]</tw-passagedata>
-<tw-passagedata pid="20" name="Breathing Exercise" tags="" x="900" y="700">&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: this passage should trigger a 2-minute guided breathing animation/audio in the production build. In Twine, this can only be simulated with text.&lt;/div&gt;
-
-Breathe in slowly. Four counts.
-
-Hold, gently. Four counts.
-
-Breathe out, slower than you breathed in. Six counts.
+<tw-passagedata pid="20" name="Breathing Exercise" tags="" x="900" y="700">[breathing]
 
 We&#x27;ll do this together, a few more times, no need to count out loud.
 
@@ -314,22 +381,18 @@ But the people walking past didn&#x27;t need the brightest light. They just need
 The lantern kept flickering, softly, all night. And it was enough.
 
 [[I&#x27;m ready to continue-&gt;Ending Hub]]</tw-passagedata>
-<tw-passagedata pid="22" name="Calming Music" tags="" x="300" y="900">&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: this passage should trigger an embedded audio track in the production build.&lt;/div&gt;
+<tw-passagedata pid="22" name="Calming Music" tags="" x="300" y="900">[audio:Calming Melodies]
 
 A slow, low melody begins — the kind with space between the notes.
 
 Nothing to follow, nothing to figure out. Just something to listen to.
 
 [[I&#x27;m ready to continue-&gt;Ending Hub]]</tw-passagedata>
-<tw-passagedata pid="23" name="Write Thought" tags="" x="500" y="900">&lt;div class=&quot;dev-note&quot;&gt;NOTE FOR DEV: this passage should include a text input field in the production build, allowing the user to type a thought that visually &quot;fades&quot; or &quot;releases&quot; on screen.&lt;/div&gt;
-
-What&#x27;s the one thought that keeps circling?
+<tw-passagedata pid="23" name="Write Thought" tags="" x="500" y="900">What&#x27;s the one thought that keeps circling?
 
 Write it down, even just in your head. You don&#x27;t have to solve it. Just name it, and let it sit somewhere outside of you for tonight.
 
-(input-box: bind _thought, &quot;X&quot;)
-
-[[I&#x27;ve let it go-&gt;Ending Hub]]</tw-passagedata>
+[fade-input:Type your thought here...-&gt;Ending Hub]</tw-passagedata>
 <tw-passagedata pid="24" name="Ending Hub" tags="" x="700" y="900">What helped you tonight?
 
 [[🌙 The breathing-&gt;Note Prompt]]
